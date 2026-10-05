@@ -22,6 +22,14 @@ from os import getcwd
 
 sys.path.insert(0, join(abspath(getcwd()), "app"))
 import models
+from core.config import settings
+
+# PARCHE CNTA: la URL sale de la configuracion y no de un `sed` sobre
+# alembic.ini en el entrypoint, que se rompia con '/' o '&' en la contrasena.
+# El % se duplica porque ConfigParser lo trata como interpolacion.
+config.set_main_option(
+    "sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI.replace("%", "%%")
+)
 
 target_metadata = models.User.metadata
 

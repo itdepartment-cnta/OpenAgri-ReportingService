@@ -28,8 +28,10 @@ def add_fonts(pdf):
 
 class EX(FPDF):
     def header(self):
+        # PARCHE CNTA: logo local. Se descargaba de Internet en CADA pagina y,
+        # si fallaba la descarga, el PDF entero fallaba con el.
         self.image(
-            "https://horizon-openagri.eu/wp-content/uploads/2023/12/Logo-Open-Agri-blue-1024x338.png",
+            os.path.join(settings.PROJECT_ROOT, "assets", "open-agri.png"),
             w=40.0,
             keep_aspect_ratio=True,
             x=160,

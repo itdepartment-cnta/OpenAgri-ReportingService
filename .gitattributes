@@ -1,0 +1,4 @@
+# PARCHE CNTA: los scripts de shell deben ir siempre con LF. Con core.autocrlf en
+# Windows, entrypoint.sh se descargaba con CRLF y el contenedor no arrancaba
+# ("bash<CR>: No such file or directory", CR = retorno de carro).
+*.sh text eol=lf

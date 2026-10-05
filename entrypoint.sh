@@ -7,44 +7,47 @@ set -e
 # Check whether these values have been passed
 if [ -z "${REPORTING_POSTGRES_USER}" ]; then
   echo "Postgres username is not set in env"
-  exit
+  exit 1
 fi
 
 if [ -z "${REPORTING_POSTGRES_PASSWORD}" ]; then
   echo "Postgres password is not set in env"
-  exit
+  exit 1
 fi
 
 if [ -z "${REPORTING_POSTGRES_HOST}" ]; then
   echo "Postgres hostname is not set in env"
-  exit
+  exit 1
 fi
 
 if [ -z "${REPORTING_POSTGRES_PORT}" ]; then
   echo "Postgres port is not set in env"
-  exit
+  exit 1
 fi
 
 if [ -z "${REPORTING_POSTGRES_DB}" ]; then
   echo "Postgres database name is not set in env"
-  exit
+  exit 1
 fi
-if [ -z "${REPORTING_GATEKEEPER_USERNAME}" ]; then
-  echo "Gatekeeper username is not set in env"
-  exit
-fi
-if [ -z "${REPORTING_GATEKEEPER_PASSWORD}" ]; then
-  echo "Gatekeeper password  is not set in env"
-  exit
-fi
+# PARCHE CNTA: las credenciales de GateKeeper solo se exigen si se usa GateKeeper.
+case "$(echo "${REPORTING_USING_GATEKEEPER:-true}" | tr '[:upper:]' '[:lower:]')" in
+  true|1|yes|on)
+    for var in REPORTING_GATEKEEPER_BASE_URL REPORTING_GATEKEEPER_USERNAME REPORTING_GATEKEEPER_PASSWORD; do
+      if [ -z "${!var}" ]; then
+        echo "$var is not set in env (required when REPORTING_USING_GATEKEEPER is enabled)"
+        exit 1
+      fi
+    done
+    ;;
+esac
 if [ -z "${REPORTING_BACKEND_CORS_ORIGINS}" ]; then
   echo "Cors is not set in env"
-  exit
+  exit 1
 fi
 
 
-# Before the migrations can take place, we need to build the connection string in the alembic.ini file
-sed -i -e "s/PGU/${REPORTING_POSTGRES_USER}/g" -e "s/PGP/${REPORTING_POSTGRES_PASSWORD}/g" -e "s/PGH/${REPORTING_POSTGRES_HOST}/g" -e "s/PGO/${REPORTING_POSTGRES_PORT}/g" -e "s/PGD/${REPORTING_POSTGRES_DB}/g" ./alembic.ini
+# PARCHE CNTA: la URL de conexion la construye alembic/env.py desde la configuracion
+# (antes, un sed sobre alembic.ini que fallaba con '/' o '&' en la contrasena).
 
 
 # Migrate sqlalchemy models to postgres via alembic

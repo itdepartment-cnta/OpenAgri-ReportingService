@@ -1,4 +1,6 @@
-from pydantic import AnyHttpUrl, field_validator
+from urllib.parse import quote_plus
+
+from pydantic import AnyHttpUrl, field_validator, model_validator
 from pydantic_settings import BaseSettings
 from password_validator import PasswordValidator
 from typing import Optional, Any
@@ -9,8 +11,10 @@ from os import path, environ
 class Settings(BaseSettings):
     PROJECT_ROOT: str = path.dirname(path.dirname(path.realpath(__file__)))
 
-    REPORTING_GATEKEEPER_USERNAME: str
-    REPORTING_GATEKEEPER_PASSWORD: str
+    # PARCHE CNTA: solo obligatorias con REPORTING_USING_GATEKEEPER (ver el
+    # validador al final). Sin GateKeeper el servicio no las necesita.
+    REPORTING_GATEKEEPER_USERNAME: str = ""
+    REPORTING_GATEKEEPER_PASSWORD: str = ""
     REPORTING_BACKEND_CORS_ORIGINS: Any
 
     REPORTING_POSTGRES_USER: str
@@ -21,7 +25,7 @@ class Settings(BaseSettings):
     REPORTING_SERVICE_NAME: str
     REPORTING_SERVICE_PORT: int
     REPORTING_USING_GATEKEEPER: bool = True
-    REPORTING_GATEKEEPER_BASE_URL: str
+    REPORTING_GATEKEEPER_BASE_URL: str = ""
     REPORTING_FARMCALENDAR_BASE_URL: str = "api/proxy/farmcalendar/api/v1"
     REPORTING_FARMCALENDAR_URLS: dict = {
         "irrigations": "/IrrigationOperations/",
@@ -54,9 +58,11 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return v
 
+        # PARCHE CNTA: usuario y contrasena codificados. Una contrasena con '/',
+        # '@' o ':' rompia la URL de conexion.
         url = "postgresql://{}:{}@{}:{}/{}".format(
-            environ.get("REPORTING_POSTGRES_USER"),
-            environ.get("REPORTING_POSTGRES_PASSWORD"),
+            quote_plus(environ.get("REPORTING_POSTGRES_USER", "")),
+            quote_plus(environ.get("REPORTING_POSTGRES_PASSWORD", "")),
             environ.get("REPORTING_POSTGRES_HOST"),
             environ.get("REPORTING_POSTGRES_PORT", 5439),
             environ.get("REPORTING_POSTGRES_DB"),
@@ -70,6 +76,19 @@ class Settings(BaseSettings):
     ).has().uppercase().has().lowercase().has().digits().has().no().spaces()
     JWT_ACCESS_TOKEN_EXPIRATION_TIME: int
     JWT_SIGNING_KEY: str
+
+    @model_validator(mode="after")
+    def gatekeeper_requerido_si_se_usa(self):
+        if self.REPORTING_USING_GATEKEEPER and not (
+            self.REPORTING_GATEKEEPER_BASE_URL
+            and self.REPORTING_GATEKEEPER_USERNAME
+            and self.REPORTING_GATEKEEPER_PASSWORD
+        ):
+            raise ValueError(
+                "REPORTING_USING_GATEKEEPER esta activo: hacen falta "
+                "REPORTING_GATEKEEPER_BASE_URL, _USERNAME y _PASSWORD."
+            )
+        return self
 
 
 settings = Settings()
