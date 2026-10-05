@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     }
 
     PDF_DIRECTORY: str = "user_reports/"
+    # PARCHE CNTA: borrado de los PDF generados. 0 = no se borra nada (upstream).
+    REPORTING_PDF_RETENTION_HOURS: float = 0
+    REPORTING_PDF_CLEANUP_INTERVAL_MINUTES: float = 30
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
 
     @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
