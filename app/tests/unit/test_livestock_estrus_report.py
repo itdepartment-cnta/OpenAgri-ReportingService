@@ -74,7 +74,7 @@ class TestI18n(TestCase):
         self.assertEqual(t("es", "estrus.in_estrus"), "En celo")
 
     def test_parametros(self):
-        self.assertEqual(t("es", "estrus.generated", date="05/10/2026"), "Generado el 05/10/2026")
+        self.assertEqual(t("es", "report.generated", date="05/10/2026"), "Generado el 05/10/2026")
 
     def test_idioma_desconocido_o_nulo_cae_al_ingles(self):
         self.assertEqual(t("fr", "estrus.in_estrus"), "In estrus")

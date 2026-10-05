@@ -19,6 +19,7 @@ from core import settings
 from schemas import (
     PDF,
     LivestockEstrusReportRequest,
+    MilkQualityReportRequest,
     ManualFarmInfo,
     ManualParcelInfo,
     QualityCertification,
@@ -30,6 +31,7 @@ from utils.field_notebook_report import process_field_notebook_data
 from utils.i18n import Lang
 from utils.irrig_fert_pest_report import process_irrigation_fertilization_data
 from utils.livestock_estrus_report import process_livestock_estrus_data
+from utils.livestock_milk_quality_report import process_milk_quality_data
 from utils.standalone_observation_report import process_standalone_observation_data
 from fastapi.responses import FileResponse
 
@@ -472,9 +474,8 @@ async def generate_livestock_estrus_report(
     return PDF(uuid=uuid_v4)
 
 
-@router.get("/livestock-estrus-report/{report_id}/", response_class=FileResponse)
-def retrieve_livestock_estrus_pdf(report_id: UUID4):
-    """Retrieve a generated livestock estrus report."""
+def _retrieve_livestock_pdf(report_id) -> FileResponse:
+    """Recupera un informe de ganaderia ya generado (comun a todos ellos)."""
     base = f"{settings.PDF_DIRECTORY}livestock/{report_id}"
     if os.path.exists(f"{base}.pdf"):
         return FileResponse(
@@ -486,3 +487,43 @@ def retrieve_livestock_estrus_pdf(report_id: UUID4):
         status_code=202,
         detail=f"PDF uuid {report_id} is being generated. Please be patient and try again in couple of seconds.",
     )
+
+
+@router.get("/livestock-estrus-report/{report_id}/", response_class=FileResponse)
+def retrieve_livestock_estrus_pdf(report_id: UUID4):
+    """Retrieve a generated livestock estrus report."""
+    return _retrieve_livestock_pdf(report_id)
+
+
+@router.post("/livestock-milk-quality-report/", response_model=PDF)
+async def generate_livestock_milk_quality_report(
+    background_tasks: BackgroundTasks,
+    payload: MilkQualityReportRequest,
+    lang: Lang = "en",
+):
+    """
+    Generates a Milk Quality (somatic cell count, SCC) Report PDF from the data
+    in the request body.
+
+    Same approach as the livestock estrus report: no Farm Calendar lookups, no
+    authentication, the caller supplies the data (see
+    `MilkQualityReportRequest`). Do not expose this service directly to the
+    Internet. Each sample is classified `low` or `high`; there is no numeric
+    count.
+
+    `lang` selects the language of the report (`en` or `es`).
+    """
+    uuid_v4 = str(uuid.uuid4())
+    background_tasks.add_task(
+        process_milk_quality_data,
+        data=payload,
+        lang=lang,
+        pdf_file_name=f"livestock/{uuid_v4}",
+    )
+    return PDF(uuid=uuid_v4)
+
+
+@router.get("/livestock-milk-quality-report/{report_id}/", response_class=FileResponse)
+def retrieve_livestock_milk_quality_pdf(report_id: UUID4):
+    """Retrieve a generated milk quality report."""
+    return _retrieve_livestock_pdf(report_id)
