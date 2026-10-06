@@ -1,0 +1,25 @@
+# PARCHE CNTA: requirements.txt para Windows. Sin herramientas de desarrollo ni
+# geopandas (el codigo no lo importa), y psycopg2-binary en vez de psycopg2.
+fastapi==0.111.0
+alembic==1.13.1 # DB migrations
+requests==2.32.3
+psycopg2-binary==2.9.9 # PSQL driver (con ruedas para Windows; psycopg2 compila)
+password-validator==1.0 # Enforceable rules for passwords
+pydantic-settings==2.2.1 # Pydantic settings options [donated to the python-org, not part of the main package anymore]
+passlib==1.7.4 # For password managment
+PyJWT==2.8.0 # Instead of jose (has a CVE)
+argon2_cffi==23.1.0 # Backend for Argon encryption
+python-multipart==0.0.9 # For uploading files (.csv, .xlss ...)
+SQLAlchemy==2.0.31
+pydantic==2.8.2
+starlette==0.37.2
+geopy==2.4.1
+fpdf2==2.7.9
+PyLD==2.0.4
+matplotlib==3.10.7
+
+httpx==0.27.2
+
+
+
+pandas>=2.0,<3  # lo usa generate_aggregation_data (antes llegaba con geopandas)
