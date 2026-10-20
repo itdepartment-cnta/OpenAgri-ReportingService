@@ -107,24 +107,26 @@ TEXTS = {
         "estrus.none_in_estrus": "Ningún animal en celo en el periodo.",
         # ── calidad de leche ─────────────────────────────────────
         "milk.title": "Informe de calidad de leche (SCC)",
-        "milk.section_high": "3. Muestras con calidad mala",
+        "milk.section_high": "3. Muestras con calidad media",
         "milk.section_detail": "5. Detalle por muestra",
         "milk.analyzed": "Muestras analizadas",
-        "milk.normal": "Calidad buena",
-        "milk.high": "Calidad mala",
-        "milk.rate": "Porcentaje con calidad mala",
+        "milk.normal": "Calidad alta",
+        "milk.high": "Calidad media",
+        "milk.rate": "Porcentaje con calidad media",
         "milk.chart_title": "Calidad de leche por subida",
         "milk.col_samples": "Muestras",
-        "milk.col_normal": "Buena",
-        "milk.col_high": "Mala",
+        "milk.col_normal": "Alta",
+        "milk.col_high": "Media",
         "milk.col_sample": "Muestra",
         "milk.col_result": "Resultado",
-        "milk.result_normal": "Calidad buena",
-        "milk.result_high": "Calidad mala",
-        "milk.none_high": "Ninguna muestra con calidad mala en el periodo.",
+        "milk.result_normal": "Calidad alta",
+        "milk.result_high": "Calidad media",
+        "milk.none_high": "Ninguna muestra con calidad media en el periodo.",
         "milk.note": (
             "Clasificación del modelo a partir del espectro de cada muestra "
-            "(recuento de células somáticas, SCC). No es un recuento numérico."
+            "(recuento de células somáticas, SCC). No es un recuento numérico. "
+            "Calidad alta: menos de 500000 células somáticas; "
+            "calidad media: más de 500000."
         ),
     },
 }
